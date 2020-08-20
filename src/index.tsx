@@ -1,13 +1,24 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import { ConnectedRouter } from 'connected-react-router'
+import { Provider } from 'react-redux'
+// import './index.css'
+import App from './App'
+import * as serviceWorker from './serviceWorker'
+import history from './history'
+import store from './store'
 
+// connected-react-router - action経由でルーティングが可能、push,replace..
+// historyを強化
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <ConnectedRouter history={history}>
+        <App />
+      </ConnectedRouter>
+    </Provider>
   </React.StrictMode>,
+
   document.getElementById('root')
 );
 
