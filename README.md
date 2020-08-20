@@ -1,3 +1,14 @@
+# result-viewer
+
+## to watch
+
+1. clone or download this repository
+2. run ```cd path/to/result-viewer```
+3. run ```yarn install```
+4. run ```yarn start```
+
+---
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
