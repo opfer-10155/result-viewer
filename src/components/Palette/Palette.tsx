@@ -29,7 +29,7 @@ const colorizer = new Colorizer()
 export const Palette: SFC = props => {
   const space = 2
   const classes = useStyles();
-  const tables = meta//useTableMeta()
+  const tables = useTableMeta()
   const initialState = {
     selectedTables: {},
     // isSelected: tables.map(() => false),
