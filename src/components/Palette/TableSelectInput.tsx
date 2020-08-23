@@ -32,6 +32,9 @@ const useStyles = makeStyles((theme: Theme) => ({
   title: {
     fontSize: 14,
   },
+  columnList: {
+    display: 'flex'
+  }
 }));
 
 // -----------logic------------
@@ -42,10 +45,10 @@ type Props = {
   // selectedX: string
   // selectedY: string
   // selectedZ: string
-  onChangeTable: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void
-  onChangeX: (event: React.ChangeEvent<HTMLInputElement>, value: string) => void
-  onChangeY: (event: React.ChangeEvent<HTMLInputElement>, value: string) => void
-  onChangeZ: (event: React.ChangeEvent<HTMLInputElement>, value: string) => void
+  onChangeTable: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean, key: string) => void
+  onChangeX: (event: React.ChangeEvent<HTMLInputElement>, value: string, key: string) => void
+  onChangeY: (event: React.ChangeEvent<HTMLInputElement>, value: string, key: string) => void
+  onChangeZ: (event: React.ChangeEvent<HTMLInputElement>, value: string, key: string) => void
 }
 
 // -----------render------------
@@ -80,10 +83,10 @@ export default function TableSelectInput(props: Props) {
         <Grid item xs={3}>
           <Card className={classes.card}>
           {/* <CardHeader title={"Select tables"} /> */}
+            <Typography className={classes.title} color="textSecondary" gutterBottom>
+              Select tables
+            </Typography>
             <CardContent>
-              <Typography className={classes.title} color="textSecondary" gutterBottom>
-                Select tables
-              </Typography>
               <TableList
                 tables={tables}
                 // isSelected={isSelected}
@@ -95,26 +98,28 @@ export default function TableSelectInput(props: Props) {
         </Grid>
         <Grid item xs={3}>
           <Card className={classes.card}>
+            <Typography className={classes.title} color="textSecondary" gutterBottom>
+              Select X
+            </Typography>
             <CardContent>
-              <Typography className={classes.title} color="textSecondary" gutterBottom>
-                Select X
-              </Typography>
+              <div className={classes.columnList}>
+              {
+                Object.keys(selectedTables).map((key) => {
+                  const table = selectedTables[key]
+                  return (
+                    <ColumnList
+                      label={table.name}
+                      colnames={table.colnames}
+                      selected={table.selectedX}
+                      onChange={(e, value) => onChangeX(e, value, key)}
+                      color={table.color}
+                      key={key}
+                    />
+                  )
+                })
+              }
+              </div>
             </CardContent>
-            {/* {
-              Object.keys(selectedTables).map((key) => {
-                const table = selectedTables[key]
-                return (
-                  <ColumnList
-                    label={table.name}
-                    colnames={table.colnames}
-                    selected={table.selectedX}
-                    onChange={onChangeX}
-                    color={table.color}
-                    key={key}
-                  />
-                )
-              })
-            } */}
           </Card>
         </Grid>
         <Grid item xs={3}>
@@ -122,7 +127,8 @@ export default function TableSelectInput(props: Props) {
             <Typography className={classes.title} color="textSecondary" gutterBottom>
               Select Y
             </Typography>
-            {/* {
+            <div className={classes.columnList}>
+            {
               Object.keys(selectedTables).map((key) => {
                 const table = selectedTables[key]
                 return (
@@ -130,23 +136,38 @@ export default function TableSelectInput(props: Props) {
                     label={table.name}
                     colnames={table.colnames}
                     selected={table.selectedY}
-                    onChange={onChangeY}
+                    onChange={(e, value) => onChangeY(e, value, key)}
                     color={table.color}
                     key={key}
                   />
                 )
               })
-            } */}
+            }
+            </div>
           </Card>
         </Grid>
         <Grid item xs={3}>
           <Card className={classes.card}>
-            {/* <ColumnList
-              label='z'
-              colnames={colnames}
-              selected={selectedZ}
-              onChange={onChangeZ}
-            /> */}
+            <Typography className={classes.title} color="textSecondary" gutterBottom>
+              Select Z
+            </Typography>
+            <div className={classes.columnList}>
+              {
+                Object.keys(selectedTables).map((key) => {
+                  const table = selectedTables[key]
+                  return (
+                    <ColumnList
+                      label={table.name}
+                      colnames={table.colnames}
+                      selected={table.selectedZ}
+                      onChange={(e, value) => onChangeZ(e, value, key)}
+                      color={table.color}
+                      key={key}
+                    />
+                  )
+                })
+              }
+            </div>
           </Card>
         </Grid>
       </Grid>

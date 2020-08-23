@@ -14,7 +14,7 @@ import { Theme } from '../../theme';
 // -----------style------------
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(1),
     height: '100%',
     color: theme.palette.primary.contrastText,
     display: 'flex'
@@ -85,8 +85,13 @@ export default function ColumnList(props: Props) {
         <FormLabel component="legend">{label}</FormLabel>
           <RadioGroup name={key} value={selected} onChange={onChange}>
           {
-            colnames.map((colname) => (
-              <FormControlLabel value={colname} control={<ColoredRadio />} label={colname} />
+            colnames.map((colname, index) => (
+              <FormControlLabel
+                value={colname}
+                control={<ColoredRadio />}
+                label={colname}
+                key={index}
+              />
             ))
           }
           </RadioGroup>

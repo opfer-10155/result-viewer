@@ -52,13 +52,13 @@ export const Palette: SFC = props => {
             // selectedX={state.xColname}
             // selectedY={state.yColname}
             // selectedZ={state.zColname}
-            onChangeTable={(event, checked) => {
-              const index = parseInt(event.target.name)
+            onChangeTable={(_, checked, key) => {
+              const index = parseInt(key)
               if(checked) {
                 dispatch({
                   type: 'selectTable',
                   table: tables[index],
-                  key: index.toString(),
+                  key,
                   color: colorizer.attach()
                 })
               }
@@ -67,24 +67,24 @@ export const Palette: SFC = props => {
                   type: 'deselectTable',
                   // table: tables[index],
                   // index,
-                  key: index.toString()
+                  key
                 })
               }
             }}
-            onChangeX={(e, value) => dispatch({
+            onChangeX={(_, value, key) => dispatch({
               type: 'selectX',
               value,
-              key: e.target.name
+              key
             })}
-            onChangeY={(e, value) => dispatch({
+            onChangeY={(_, value, key) => dispatch({
               type: 'selectY',
               value,
-              key: e.target.name
+              key
             })}
-            onChangeZ={(e, value) => dispatch({
+            onChangeZ={(_, value, key) => dispatch({
               type: 'selectZ',
               value,
-              key: e.target.name
+              key
             })}
           />
         </Grid>

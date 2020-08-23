@@ -37,7 +37,7 @@ type Props = {
   tables: TableMeta[],
   // isSelected: boolean[],
   selectedTables: {[key: string]: Table},
-  onChange: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void
+  onChange: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean, key: string) => void
 }
 
 export default function TableList(props: Props) {
@@ -56,7 +56,7 @@ export default function TableList(props: Props) {
                   control={
                     <ColoredCheckBox
                       checked={isSelected}
-                      onChange={onChange}
+                      onChange={(e, checked) => onChange(e, checked, index.toString())}
                       name={index.toString()}
                     />
                   }
