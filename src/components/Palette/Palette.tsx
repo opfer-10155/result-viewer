@@ -1,25 +1,27 @@
 import React, { SFC, useReducer, useEffect } from 'react'
-import { makeStyles } from '@material-ui/styles';
-import { Grid } from '@material-ui/core';
-import { Theme } from '../../theme';
+import { makeStyles } from '@material-ui/styles'
+import Grid from '@material-ui/core/Grid'
+import Card from '@material-ui/core/Card'
+
+import { Theme } from '../../theme'
 import TableSelectInput from './TableSelectInput'
 import Graph from './Graph/Graph'
 import OptionMenu from './OptionMenu'
 import reducer from './reducer'
 import { useTableMeta } from './hooks'
 import Colorizer from './colorizer'
-import {meta} from "../../mock/meta/table/all"
-// テーブル一覧を取得
-// const getTables: () => ITable[] = () => []// async () => []
-
-// const useTables = () => {
-//   useEffect()
-// }
+import { getColnamesDiff, getDataDiff } from './diff'
 
 // -----------style------------
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
     padding: theme.spacing(2)
+  },
+  graphCard: {
+    padding: theme.spacing(2),
+    // backgroundColor: 'blue',
+    height: 700,
+    color: theme.palette.primary.contrastText
   }
 }))
 
@@ -32,10 +34,9 @@ export const Palette: SFC = props => {
   const tables = useTableMeta()
   const initialState = {
     selectedTables: {},
-    // isSelected: tables.map(() => false),
-    // xColname: '',
-    // yColname: '',
-    // zColname: '',
+    colnames: {},
+    dataset: {},
+    tableAxises: {},
     zValue: 0,
     viewPF: false, // パレートフロンティアを表示するか
     viewScatter: false // Scatterを表示するか
@@ -48,49 +49,52 @@ export const Palette: SFC = props => {
           <TableSelectInput
             tables={tables}
             selectedTables={state.selectedTables}
+            colnames={state.colnames}
             // isSelected={state.isSelected}
-            // selectedX={state.xColname}
-            // selectedY={state.yColname}
-            // selectedZ={state.zColname}
-            onChangeTable={(_, checked, key) => {
-              const index = parseInt(key)
+            onChangeTable={(_, checked, table) => {
               if(checked) {
-                dispatch({
-                  type: 'selectTable',
-                  table: tables[index],
-                  key,
-                  color: colorizer.attach()
+                getColnamesDiff(state.colnames, table.id)
+                .then((colnames) => {
+                  dispatch({
+                    type: 'selectTable',
+                    table,
+                    color: colorizer.attach(),
+                    colnames: colnames
+                  })
                 })
               }
               else {
                 dispatch({
                   type: 'deselectTable',
-                  // table: tables[index],
-                  // index,
-                  key
+                  id: table.id
                 })
               }
             }}
-            onChangeX={(_, value, key) => dispatch({
-              type: 'selectX',
-              value,
-              key
-            })}
-            onChangeY={(_, value, key) => dispatch({
-              type: 'selectY',
-              value,
-              key
-            })}
-            onChangeZ={(_, value, key) => dispatch({
-              type: 'selectZ',
-              value,
-              key
-            })}
+            onChangeAxis={(_, value, direction, tableId) => {
+              getDataDiff(state.selectedTables[tableId], value, direction)
+              .then(dataDiff => {
+                dispatch({
+                  type: 'selectAxis',
+                  direction,
+                  value,
+                  dataDiff,
+                  tableId
+                })
+              })
+            }}
           />
         </Grid>
 
         <Grid item xs={8}>
-          <Graph />
+          <Card className={classes.graphCard}>
+            <Graph
+              selectedTables={state.selectedTables}
+              dataset={state.dataset}
+              zValue={state.zValue}
+              viewPF={state.viewPF}
+              viewScatter={state.viewScatter}
+            />
+          </Card>
         </Grid>
 
         <Grid item xs={4}>

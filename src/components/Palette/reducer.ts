@@ -1,32 +1,56 @@
 import _ from 'underscore'
-import { colors } from '@material-ui/core'
+import { getTableAxises } from '../../api'
 
 // --------- Base Types -----------
 export type TableMeta = {
+  id: number
   name: string
-  colnames: string[]
 }
 
+export type Colnames = {
+  [id: number]: string[]
+}
+
+export type DataSet = {
+  [id: number]: {[key: string]: number}[]
+}
+
+// export type TableAxises = {
+//   [id: number]: {
+//     [direction: string]: string
+//   }
+// }
+
 export type Table = {
+  id: number
   name: string
-  colnames: string[]
-  selectedX: string
-  selectedY: string
-  selectedZ: string
+  // colnames: string[]
+  X: string
+  Y: string
+  Z: string
   color: string
 }
 
+export type SelectedTables = {
+  [id: number]: Table
+}
+
+// ---------helper function----------
+// const getColnames: (id: number) => string[]
+// = (id) => {
+//   const api = async () => {
+//     const axises = await getTableAxises(id)
+//     return axises
+//   }
+//   return api()
+// }
+
 // --------- State -----------
 export type State = {
-  // tables: TableMeta[],
-  selectedTables: {[key: string]: Table},
-  // isSelected: boolean[],
-  // xColname: string,
-  // yColname: string,
-  // zColname: string,
-  // xColname: {[key: string]: string},
-  // yColname: {[key: string]: string},
-  // zColname: {[key: string]: string},
+  selectedTables: SelectedTables,
+  colnames: Colnames,
+  dataset: DataSet
+  // tableAxises: TableAxises,
   zValue: any,
   viewPF: boolean, // パレートフロンティアを表示するか
   viewScatter: boolean // Scatterを表示するか
@@ -35,31 +59,20 @@ export type State = {
 // --------- Action -----------
 export type Action = {
   type: 'selectTable'
-  // index: number
-  key:   string
   table: TableMeta
   color: string
+  colnames: string[]
 } |
 {
   type: 'deselectTable'
-  // index: number
-  key:   string
-  // table: TableMeta
+  id: number
 } |
 {
-  type: 'selectX'
+  type: 'selectAxis'
+  direction: string
   value: string
-  key: string
-} |
-{
-  type: 'selectY'
-  value: string
-  key: string
-} |
-{
-  type: 'selectZ'
-  value: string
-  key: string
+  tableId: number
+  dataDiff: {[key: string]: number}[]
 } |
 {
   type: 'changeZValue'
@@ -72,87 +85,45 @@ export type Action = {
 {
   type: 'changeViewScatter'
   show: boolean
+} | {
+  type: 'setColnames',
+  table: TableMeta,
+  colnames: string[]
 }
-// | {
-//   type: 'setTables',
-//   tables: TableMeta[]
-// }
-
-// export const mergeTables: (tables: Table[]) => Table
-// = (tables: Table[]) => {
-//   const table: Table = {
-//     name: 'merged',
-//     colnames: [],
-//     body: {}
-//   }
-//   tables.forEach(t => {
-//     table.name = table.name+`(${t.name})`
-//     t.colnames.forEach(colname => {
-//       table.colnames.push(t.name+`.${colname}`)
-//       table.body[t.name+colname] = t.body[colname]
-//     })
-//   })
-//   return table
-// }
-
 
 // -----------  reducer ------------
 export const reducer: (state: State, action: Action) => State
 = (state, action) => {
   switch(action.type) {
-    // case 'setTables': {
-    //   const tables = [...action.tables]
-    //   return {
-    //     ...state,
-    //     tables
-    //   }
-    // }
     case 'selectTable': {
-      if (state.selectedTables[action.key]) {
-        return {...state}
+      const { table, color } = action
+      const id = table.id
+      const selectedTables = {...state.selectedTables}
+      const newTable: Table = {
+        ...table,
+        X: '',
+        Y: '',
+        Z: '',
+        color,
       }
-      else {
-        const selectedTables = {...state.selectedTables}
-        const newTable = {
-          ...action.table,
-          color: action.color,
-          selectedX: '',
-          selectedY: '',
-          selectedZ: ''
-        }
-        selectedTables[action.key] = newTable
-        return {
-          ...state,
-          selectedTables
-        }
+      selectedTables[id] = newTable
+
+      const colnames = {...state.colnames}
+      colnames[id] = action.colnames
+
+      return {
+        ...state,
+        selectedTables,
+        colnames
       }
-      // if (state.isSelected[action.index]) {
-      //   return {...state}
-      // }
-      // else {
-      //   const selectedTables = {...state.selectedTables}
-      //   selectedTables[action.key] = action.table
-
-      //   const new_isSelected = [...state.isSelected]
-      //   new_isSelected[action.index] = true
-
-      //   return {
-      //     ...state,
-      //     selectedTables, // tables.filter((_, index) => new_isSelected[index]), //[...tables, action.table],
-      //     isSelected: new_isSelected
-      //   }
-      // }
     }
     case 'deselectTable': {
-      if (state.selectedTables[action.key]) {
-        const selectedTables = _.omit({...state.selectedTables}, action.key)
-        return {
-          ...state,
-          selectedTables
-        }
-      }
-      else {
-        return {...state}
+      const { id } = action
+      const selectedTables = {...state.selectedTables}
+      delete selectedTables[id]
+      return {
+        ...state,
+        selectedTables
       }
       // if (state.isSelected[action.index]) {
       //   const selectedTables = _.omit({...state.selectedTables}, action.key)
@@ -168,40 +139,22 @@ export const reducer: (state: State, action: Action) => State
       //   return {...state}
       // }
     }
-    case 'selectX': {
+    case 'selectAxis': {
+      const { tableId, value, direction, dataDiff } = action
       const selectedTables = {...state.selectedTables}
-      const table = selectedTables[action.key]
-      table.selectedX = action.value
+      const table = selectedTables[tableId] || {}
+      if (direction === 'X') table.X = value
+      else if (direction === 'Y') table.Y = value
+      else if (direction === 'Z') table.Z = value
+
+      const dataset = {...state.dataset}
+      if (dataDiff.length > 0) dataset[tableId] = dataDiff
+
       return {
         ...state,
-        selectedTables
+        selectedTables,
+        dataset
       }
-    }
-    case 'selectY': {
-      const selectedTables = {...state.selectedTables}
-      const table = selectedTables[action.key]
-      table.selectedY = action.value
-      return {
-        ...state,
-        selectedTables
-      }
-      // return {
-      //   ...state,
-      //   yColname: action.value
-      // }
-    }
-    case 'selectZ': {
-      const selectedTables = {...state.selectedTables}
-      const table = selectedTables[action.key]
-      table.selectedZ = action.value
-      return {
-        ...state,
-        selectedTables
-      }
-      // return {
-      //   ...state,
-      //   zColname: action.value
-      // }
     }
     case 'changeZValue': {
       return {

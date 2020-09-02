@@ -8,10 +8,9 @@ import Typography from '@material-ui/core/Typography';
 import { Theme } from '../../theme';
 import TableList from './TableList'
 import ColumnList from './ColumnList'
+import ColumnCard from './ColumnCard'
 import _ from 'underscore'
-import { Table, TableMeta } from './reducer'
-
-// TODO 選択したテーブルとカラムの色対応
+import { SelectedTables, TableMeta, Table, Colnames } from './reducer'
 
 /**
  * テーブルを複数選択
@@ -40,43 +39,61 @@ const useStyles = makeStyles((theme: Theme) => ({
 // -----------logic------------
 type Props = {
   tables: TableMeta[]
-  // isSelected: boolean[]
-  selectedTables: {[key: string]: Table}
-  // selectedX: string
-  // selectedY: string
-  // selectedZ: string
-  onChangeTable: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean, key: string) => void
-  onChangeX: (event: React.ChangeEvent<HTMLInputElement>, value: string, key: string) => void
-  onChangeY: (event: React.ChangeEvent<HTMLInputElement>, value: string, key: string) => void
-  onChangeZ: (event: React.ChangeEvent<HTMLInputElement>, value: string, key: string) => void
+  selectedTables: SelectedTables
+  colnames: Colnames
+  // tableAxises: TableAxises
+  // directions: string[]
+  onChangeTable: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean, table: TableMeta) => void
+  onChangeAxis: (event: React.ChangeEvent<HTMLInputElement>, value: string, direction: string, tableId: number) => void
+  // onChangeX: (event: React.ChangeEvent<HTMLInputElement>, value: string, key: string) => void
 }
+
+// -----------helper------------
+const makeColumnList = (
+  selectedTables: SelectedTables,
+  colnames: Colnames,
+  onChangeAxis: (event: React.ChangeEvent<HTMLInputElement>, value: string, direction: string, tableId: number) => void,
+  direction: 'X' | 'Y' | 'Z'
+) => {
+  const axis = (table: Table) => {
+    switch(direction) {
+      case 'X': return table.X
+      case 'Y': return table.Y
+      case 'Z': return table.Z
+      default: return ''
+    }
+  }
+  return Object.values(selectedTables).map(table => {
+    const { id } = table
+    return (
+      <ColumnList
+        label={table.name}
+        colnames={colnames[id] || ['X', 'Y', 'Z']}
+        selected={axis(table)}
+        onChange={(e, value) => onChangeAxis(e, value, direction, id)}
+        color={table.color}
+        key={id.toString()}
+      />
+    )
+  })
+}
+
 
 // -----------render------------
 export default function TableSelectInput(props: Props) {
   const {
     tables,
-    // isSelected,
     selectedTables,
-    // selectedX,
-    // selectedY,
-    // selectedZ,
+    colnames,
+    // tableAxises,
+    // directions,
     onChangeTable,
-    onChangeX,
-    onChangeY,
-    onChangeZ
+    onChangeAxis
   } = props
 
   const classes = useStyles()
   const space = 2
-  // const mergedTable = mergeTables(
-  //   tables.filter((_, index) => isSelected[index])
-  // )
-  // const colnames = mergedTable.colnames
-  // _.flatten(
-  //   tables
-  //   .filter((_, index) =>isSelected[index])
-  //   .map(table => table.colnames)
-  // )
+
   return (
     <div className={classes.root}>
       <Grid container spacing={space}>
@@ -97,80 +114,46 @@ export default function TableSelectInput(props: Props) {
           </Card>
         </Grid>
         <Grid item xs={3}>
-          <Card className={classes.card}>
-            <Typography className={classes.title} color="textSecondary" gutterBottom>
-              Select X
-            </Typography>
-            <CardContent>
-              <div className={classes.columnList}>
-              {
-                Object.keys(selectedTables).map((key) => {
-                  const table = selectedTables[key]
-                  return (
-                    <ColumnList
-                      label={table.name}
-                      colnames={table.colnames}
-                      selected={table.selectedX}
-                      onChange={(e, value) => onChangeX(e, value, key)}
-                      color={table.color}
-                      key={key}
-                    />
-                  )
-                })
-              }
-              </div>
-            </CardContent>
-          </Card>
+          <ColumnCard
+            selectedTables={selectedTables}
+            colnames={colnames}
+            onChangeAxis={onChangeAxis}
+            direction={'X'}
+          />
         </Grid>
         <Grid item xs={3}>
-          <Card className={classes.card}>
-            <Typography className={classes.title} color="textSecondary" gutterBottom>
-              Select Y
-            </Typography>
-            <div className={classes.columnList}>
-            {
-              Object.keys(selectedTables).map((key) => {
-                const table = selectedTables[key]
-                return (
-                  <ColumnList
-                    label={table.name}
-                    colnames={table.colnames}
-                    selected={table.selectedY}
-                    onChange={(e, value) => onChangeY(e, value, key)}
-                    color={table.color}
-                    key={key}
-                  />
-                )
-              })
-            }
-            </div>
-          </Card>
+          <ColumnCard
+            selectedTables={selectedTables}
+            colnames={colnames}
+            onChangeAxis={onChangeAxis}
+            direction={'Y'}
+          />
         </Grid>
         <Grid item xs={3}>
-          <Card className={classes.card}>
-            <Typography className={classes.title} color="textSecondary" gutterBottom>
-              Select Z
-            </Typography>
-            <div className={classes.columnList}>
-              {
-                Object.keys(selectedTables).map((key) => {
-                  const table = selectedTables[key]
-                  return (
-                    <ColumnList
-                      label={table.name}
-                      colnames={table.colnames}
-                      selected={table.selectedZ}
-                      onChange={(e, value) => onChangeZ(e, value, key)}
-                      color={table.color}
-                      key={key}
-                    />
-                  )
-                })
-              }
-            </div>
-          </Card>
+          <ColumnCard
+            selectedTables={selectedTables}
+            colnames={colnames}
+            onChangeAxis={onChangeAxis}
+            direction={'Z'}
+          />
         </Grid>
       </Grid>
     </div>
   )
 }
+
+/* {
+  Object.keys(selectedTables).map((key) => {
+    const table = selectedTables[key]
+    return (
+      <ColumnList
+        label={table.name}
+        colnames={table.colnames}
+        selected={table.selectedZ}
+        onChange={(e, value) => onChangeZ(e, value, key)}
+        color={table.color}
+        key={key}
+      />
+    )
+  })
+} */

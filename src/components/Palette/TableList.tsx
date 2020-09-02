@@ -36,32 +36,31 @@ const makeColoredCheckBox = (color: string) => withStyles({
 type Props = {
   tables: TableMeta[],
   // isSelected: boolean[],
-  selectedTables: {[key: string]: Table},
-  onChange: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean, key: string) => void
+  selectedTables: {[id: number]: Table},
+  onChange: (event: React.ChangeEvent<HTMLInputElement>, checked: boolean, table: TableMeta) => void
 }
 
 export default function TableList(props: Props) {
   const classes = useStyles()
-  const { tables, /* isSelected, */ onChange, selectedTables } = props
+  const { tables, onChange, selectedTables } = props
 
   return (
         <FormGroup row>
           {
-            tables.map((table, index) => {
-              const key = index.toString()
-              const isSelected = key in selectedTables
-              const ColoredCheckBox = isSelected ? makeColoredCheckBox(selectedTables[key].color) : Checkbox
+            tables.map((table) => {
+              const id = table.id
+              const isSelected = !!selectedTables[id]
+              const ColoredCheckBox = isSelected ? makeColoredCheckBox(selectedTables[id].color) : Checkbox
               return (
                 <FormControlLabel
                   control={
                     <ColoredCheckBox
                       checked={isSelected}
-                      onChange={(e, checked) => onChange(e, checked, index.toString())}
-                      name={index.toString()}
+                      onChange={(e, checked) => onChange(e, checked, table)}
                     />
                   }
                   label={table.name}
-                  key={index}
+                  key={table.id}
                 />
               )
             })

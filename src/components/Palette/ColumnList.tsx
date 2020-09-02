@@ -43,47 +43,21 @@ const makeColoredRadio = (color: string) => withStyles({
 type Props = {
   label: string
   colnames: string[]
-  // selectedTables: {[key: string]: Table},
   selected: string,
   onChange: (event: React.ChangeEvent<HTMLInputElement>, value: string) => void
   color: string
-  key: string
+  // key: string
 }
 
 export default function ColumnList(props: Props) {
   const classes = useStyles()
-  const { label, colnames, selected, onChange, color, key } = props
+  const { label, colnames, selected, onChange, color } = props
   const ColoredRadio = makeColoredRadio(color)
   return (
     <div className={classes.root}>
-      {/* {
-        Object.keys(selectedTables).map(
-          (key, i, _) => {
-            const table = selectedTables[key]
-            const { colnames, name, color } = table
-            const ColoredRadio = makeColoredRadio(color)
-            return (
-              <FormControl component="fieldset">
-                <FormLabel component="legend">{name}</FormLabel>
-                  <RadioGroup name={key} value={selected} onChange={onChange}>
-                  {
-                    colnames.map((colname) => (
-                      <FormControlLabel
-                        value={colname}
-                        control={<ColoredRadio />}
-                        label={colname}
-                      />
-                    ))
-                  }
-                  </RadioGroup>
-              </FormControl>
-            )
-          }
-        )
-      } */}
       <FormControl component="fieldset">
         <FormLabel component="legend">{label}</FormLabel>
-          <RadioGroup name={key} value={selected} onChange={onChange}>
+          <RadioGroup value={selected} onChange={onChange}>
           {
             colnames.map((colname, index) => (
               <FormControlLabel

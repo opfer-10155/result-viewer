@@ -1,28 +1,41 @@
 import React, { SFC, useState, useEffect } from 'react'
-import { makeStyles } from '@material-ui/styles';
-import { Grid, Card } from '@material-ui/core';
-import { Theme } from '../../../theme';
+import { Scatter } from 'react-chartjs-2'
+import { makeStyles } from '@material-ui/styles'
+import clsx from 'clsx';
+import { Theme } from '../../../theme'
+import { Table, DataSet } from '../reducer'
+import { makeScatterDataSet }  from './chart'
 
 // -----------style------------
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
-    padding: theme.spacing(2),
-    backgroundColor: 'blue',
-    height: 700,
-    color: theme.palette.primary.contrastText,
   }
 }));
 
 
 // -----------render------------
-export const Graph: SFC = props => {
-  const classes = useStyles();
-  const space = 2
-  return (
-    <Card className={classes.root}>
-
-    </Card>
-  )
+type Props = {
+  className?: string
+  selectedTables: {[key: string]: Table}
+  dataset: DataSet
+  zValue: any
+  viewPF: boolean
+  viewScatter: boolean
 }
 
-export default Graph
+export default function Graph(props: Props) {
+  const classes = useStyles();
+  const space = 2
+  const { className, selectedTables, dataset, zValue, viewPF, viewScatter } = props
+  const tables = Object.values(selectedTables)
+  const availableTables = tables.filter(table => table.X && table.Y && table.Z)
+  // const data = useData(availableTables)
+  return (
+    <div className={clsx(classes.root, className)}>
+      <Scatter
+        data={makeScatterDataSet(availableTables, dataset, {})}
+        height={300}
+      />
+    </div>
+  )
+}

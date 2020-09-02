@@ -59,7 +59,7 @@ export const MainLayout: SFC = props => {
       />
       <main className={classes.content}>
         {children}
-        <Footer />
+        {/* <Footer /> */}
       </main>
     </div>
   );
