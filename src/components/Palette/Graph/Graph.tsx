@@ -33,8 +33,7 @@ export default function Graph(props: Props) {
   return (
     <div className={clsx(classes.root, className)}>
       <Scatter
-        data={makeScatterDataSet(availableTables, dataset, {})}
-        height={300}
+        data={makeScatterDataSet(availableTables, dataset, {viewPF})}
       />
     </div>
   )
